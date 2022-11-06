@@ -1,4 +1,4 @@
-crawl:
+json:
 	scrapy crawl digimon -O digimon.json
 
 test:
