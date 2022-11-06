@@ -9,6 +9,8 @@ h.ignore_emphasis = True
 class DigimonSpider(scrapy.Spider):
     name = 'digimon'
 
+    custom_settings = {'FEED_EXPORT_ENCODING': 'utf-8'}
+
     def start_requests(self):
         urls = ['https://digimon.fandom.com/wiki/Digimon_Reference_Book']
 
@@ -36,7 +38,7 @@ class DigimonSpider(scrapy.Spider):
         
         if html is None:
             return ''
-            
+
         html = html.strip()
 
         text = h.handle(html)
@@ -57,7 +59,12 @@ class DigimonSpider(scrapy.Spider):
 
     def parse_digimon_page(self, response):
         name = response.xpath('//aside/h2/span[1]/text()').get()
-        original_name = self._extract_table_data(response.xpath('//aside/h2'), True)
+
+        original_name = ' '.join(response.xpath('//aside/h2//text()').getall())
+        original_name = re.sub(r'\(\s', '(', original_name)
+        original_name = re.sub(r'\s\)', ')', original_name)
+        original_name = re.sub(r'\s\s+', ' ', original_name)
+
         image = response.xpath('//aside//figure/a/img/@src').get()
         title = self._extract_table_data(response.xpath('//div[h3/text() = "Title"]/div'))
         level = self._extract_table_data(response.xpath('//div[h3/a/text() = "Level"]/div'))
@@ -98,5 +105,6 @@ class DigimonSpider(scrapy.Spider):
             "groups": groups,
             "variations": variations
         }
+
     def handle_errors(self):
         print("CENAS--------------------------------------------------------------------")
