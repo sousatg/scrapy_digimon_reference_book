@@ -13,4 +13,14 @@ class DigimonSpiderTest(unittest.TestCase):
 
     def test_parse_digimon(self):
         results = self.spider.parse_digimon_page(fake_response_from_file('digimon/Beelzemon.html', 'https://digimon.fandom.com/wiki/Beelzemon'))
-        self._test_item_results(results)
+        #self._test_item_results(results)
+        result = next(results)
+
+        self.assertEqual(result['original_name'], 'Beelzemon (ベルゼブモン Beelzebumon)')
+
+    def test_parse_page_with_image_in_name(self):
+        results = self.spider.parse_digimon_page(fake_response_from_file('digimon/Dodomon.html', 'https://digimon.fandom.com/wiki/Dodomon'))
+        results = next(results)
+        self.assertEqual(results['original_name'], 'Dodomon (ドドモン)')
+
+    
