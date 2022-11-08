@@ -1,9 +1,7 @@
 import scrapy
 import re
-import html2text
-from scrapy.loader import ItemLoader
-from digimon.items import DigimonItem
-from scrapy.loader.processors import Identity, TakeFirst, MapCompose
+from digimon.items import DigimonItem, DigimonItemLoader
+
 
 XPATH_NAME = '//aside/h2/span[1]/text() | //aside/h2/text()[1]'
 XPATH_ORIGINAL_NAME = '//aside/h2//text()'
@@ -33,54 +31,6 @@ XPATH_TRAITS = '//div[h3/text() = "Trait(s):"]/div'
 XPATH_GENDER = '//div[h3/text() = "Gender:"]/div'
 XPATH_ALIASES = '//div[h3/text() = "Aliases:"]/div'
 
-
-h = html2text.HTML2Text()
-h.ignore_links = True
-h.ignore_emphasis = True
-
-
-def replace_special_characters(text):
-    text = re.sub(r'##', '', text)
-    text = re.sub('\\\\', '', text)
-    text = re.sub('• ', '', text)
-
-    return text
-
-
-
-def split_strings(text):
-    lines = text.split('\n')
-
-    return lines
-
-def remove_reference_link_from_strings(text):
-    text = re.sub(r'\[\d*\]', '', text)
-
-    return text
-
-def strip_string(text):
-    return text.strip()
-
-def filter_empty_strings(text):
-    return None if len(text) == 0 else text
-
-class DigimonItemLoader(ItemLoader):
-    default_input_processor = MapCompose(
-        h.handle, replace_special_characters, remove_reference_link_from_strings, split_strings, strip_string, filter_empty_strings)
-
-    name_in = Identity()
-    name_out = TakeFirst()
-
-    original_name_in = Identity()
-    original_name_out = Identity()
-
-    image_in = Identity()
-    image_out = TakeFirst()
-
-    url_in = Identity()
-    url_out = TakeFirst()
-
-
 class DigimonSpider(scrapy.Spider):
     name = 'digimon'
 
@@ -93,19 +43,17 @@ class DigimonSpider(scrapy.Spider):
             yield scrapy.Request(url=url, callback=self.parse)
     
     def parse(self, response, **kwargs):
-        p = re.compile(r'^\/wiki\/.*mon$')
         urls = response.xpath("//div[@class='wikia-gallery-item']/div[@class='lightbox-caption']/a/@href").getall()
         for url in urls:
-            if not p.match(url):
-                next
-            yield scrapy.Request(f'https://digimon.fandom.com/{url}', callback=self.parse_digimon_page, errback=self.handle_errors)
+            yield scrapy.Request(
+                f'https://digimon.fandom.com/{url}', 
+                callback=self.parse_digimon_page, 
+                errback=self.handle_errors
+            )
 
-    # //div[h3/a/text() = "Prior forms"]/div/a/text() | //div[h3/a/text() = "Prior forms"]/div/sup
     # //div[h3/text() = 'Partners']/div//*[not(preceding-sibling::br)]
     # //div[h3/text() = 'Partners']/div//*[following::br)]
     # // following :: td[@class='KKKK'] /
-    # //div[@class = "pi-item"] | //section[@class = "pi-item"]/table
-    # response.xpath(//div[h3/text() = 'Partners']/div//*).extract()
 
     def parse_digimon_page(self, response):
         l = DigimonItemLoader(DigimonItem(), response)
