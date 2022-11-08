@@ -32,6 +32,9 @@ XPATH_TRAITS = '//div[h3/text() = "Trait(s):"]/div'
 XPATH_GENDER = '//div[h3/text() = "Gender:"]/div'
 XPATH_ALIASES = '//div[h3/text() = "Aliases:"]/div'
 
+class DigimonItemLoader(ItemLoader):
+    pass
+
 class DigimonSpider(scrapy.Spider):
     name = 'digimon'
 
@@ -59,7 +62,7 @@ class DigimonSpider(scrapy.Spider):
     # response.xpath(//div[h3/text() = 'Partners']/div//*).extract()
 
     def parse_digimon_page(self, response):
-        l = ItemLoader(DigimonItem(), response)
+        l = DigimonItemLoader(DigimonItem(), response)
         l.add_xpath('name', XPATH_NAME)
         l.add_xpath('original_name', XPATH_ORIGINAL_NAME)
         l.add_xpath('image', XPATH_IMAGE)
