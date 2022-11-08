@@ -1,6 +1,6 @@
-from scrapy import Field
+from scrapy import Item, Field
 
-class DigimonItem(scrapy.Item):
+class DigimonItem(Item):
     name = Field()
     original_name = Field()
     image = Field()
