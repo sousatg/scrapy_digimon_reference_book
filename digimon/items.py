@@ -1,12 +1,21 @@
 import re
 import html2text
 from scrapy import Item, Field
-from itemloaders.processors import Identity, TakeFirst, MapCompose
+from itemloaders.processors import Identity, TakeFirst, MapCompose, Compose
 from scrapy.loader import ItemLoader
 
 h = html2text.HTML2Text()
 h.ignore_links = True
 h.ignore_emphasis = True
+
+def join_original_name(original_name):
+    original_name = ' '.join(original_name)
+
+    original_name = re.sub(r'\(\s', '(', original_name)
+    original_name = re.sub(r'\s\)', ')', original_name)
+    original_name = re.sub(r'\s\s+', ' ', original_name)
+
+    return original_name
 
 def replace_special_characters(text):
     text = re.sub(r'##', '', text)
@@ -40,8 +49,8 @@ class DigimonItemLoader(ItemLoader):
     name_in = Identity()
     name_out = TakeFirst()
 
-    original_name_in = Identity()
-    original_name_out = Identity()
+    original_name_in = Compose(join_original_name)
+    original_name_out = TakeFirst()
 
     image_in = Identity()
     image_out = TakeFirst()
