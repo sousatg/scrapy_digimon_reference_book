@@ -1,7 +1,7 @@
 import re
 import html2text
 from scrapy import Item, Field
-from scrapy.loader.processors import Identity, TakeFirst, MapCompose
+from itemloaders.processors import Identity, TakeFirst, MapCompose
 from scrapy.loader import ItemLoader
 
 h = html2text.HTML2Text()
