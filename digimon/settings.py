@@ -64,7 +64,7 @@ ROBOTSTXT_OBEY = True
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
     'digimon.pipelines.HTMLToText': 400,
-    'digimon.pipelines.DigimonPipeline': 300,
+#    'digimon.pipelines.DigimonPipeline': 300,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
