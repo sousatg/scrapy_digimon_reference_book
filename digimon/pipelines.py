@@ -48,7 +48,6 @@ class HTMLToText:
         return original_name
 
     def process_item(self, item, spider):
-        adapter = ItemAdapter(item)
         url = item['url']
 
         if item['name'] in [None, '']:
@@ -64,5 +63,5 @@ class HTMLToText:
                 value = self._handle_original_name(value)
 
             item[key] = value
-            
+
         return item

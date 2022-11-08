@@ -1,10 +1,36 @@
 import scrapy
 import re
-import html2text
+from scrapy.loader import ItemLoader
+from digimon.items import DigimonItem
 
-h = html2text.HTML2Text()
-h.ignore_links = True
-h.ignore_emphasis = True
+
+XPATH_NAME = '//aside/h2/span[1]/text() | //aside/h2/text()[1]'
+XPATH_ORIGINAL_NAME = '//aside/h2//text()'
+XPATH_IMAGE = '//aside//figure/a/img/@src'
+XPATH_TITLE = '//div[h3/text() = "Title"]/div'
+XPATH_LEVEL = '//div[h3/a/text() = "Level"]/div'
+XPATH_SIZE = '//div[h3/text() = "Size"]/div'
+XPATH_DIGIMON_TYPE = '//div[h3/a/text() = "Type"]/div'
+XPATH_ATTRIBUTES = '//div[h3/a/text() = "Attribute"]/div'
+XPATH_FAMILY = '//div[h3/a/text() = "Family"]/div'
+XPATH_DEBUT = '//div[h3/text() = "Debut"]/div'
+XPATH_PRIOR_FORMS = '//div[h3/a/text() = "Prior forms"]/div'
+XPATH_NEXT_FORMS = '//div[h3/a/text() = "Next forms"]/div'
+XPATH_PARTNERS = '//div[h3/text() = "Partners"]/div'
+XPATH_VOICE_ACTORS = '//div[h3/text() = "Voice actors"]/div | //div[h3/text() = "Voice actor(s):"]/div'
+XPATH_CARDS = '//div[h3/text() = "Cards"]/div | //div[h3/text() = "Card numbers:"]/div'
+XPATH_OTHER_NAME = '//table[caption/text() = "Other Names"]/tbody'
+XPATH_GROUPS = '//table[caption/text() = "Groups"]/tbody'
+XPATH_VARIATIONS ='//table[caption/text() = "Variations"]/tbody'
+XPATH_XPATH_DIGI_FUSE_FORMS = '//div[h3/a/text() = "DigiFuse forms"]/div'
+XPATH_SLIDE_FORMS = '//div[h3/a/text() = "Slide forms"]/div'
+
+XPATH_APPEARS_IN = '//div[h3/text() = "Appears in:"]/div'
+XPATH_FIRST_APEARENCE = '//div[h3/text() = "First appearance:"]/div'
+XPATH_LAST_APEARENCE = '//div[h3/text() = "Last appearance:"]/div'
+XPATH_TRAITS = '//div[h3/text() = "Trait(s):"]/div'
+XPATH_GENDER = '//div[h3/text() = "Gender:"]/div'
+XPATH_ALIASES = '//div[h3/text() = "Aliases:"]/div'
 
 class DigimonSpider(scrapy.Spider):
     name = 'digimon'
@@ -25,7 +51,6 @@ class DigimonSpider(scrapy.Spider):
                 next
             yield scrapy.Request(f'https://digimon.fandom.com/{url}', callback=self.parse_digimon_page, errback=self.handle_errors)
 
-
     # //div[h3/a/text() = "Prior forms"]/div/a/text() | //div[h3/a/text() = "Prior forms"]/div/sup
     # //div[h3/text() = 'Partners']/div//*[not(preceding-sibling::br)]
     # //div[h3/text() = 'Partners']/div//*[following::br)]
@@ -34,22 +59,29 @@ class DigimonSpider(scrapy.Spider):
     # response.xpath(//div[h3/text() = 'Partners']/div//*).extract()
 
     def parse_digimon_page(self, response):
-        data = {}
+        l = ItemLoader(DigimonItem(), response)
+        l.add_xpath('name', XPATH_NAME)
+        l.add_xpath('original_name', XPATH_ORIGINAL_NAME)
+        l.add_xpath('image', XPATH_IMAGE)
+        l.add_value('url', response.request.url)
+        l.add_xpath('title', XPATH_TITLE)
+        l.add_xpath('level', XPATH_LEVEL)
+        l.add_xpath('digi_types', XPATH_DIGIMON_TYPE)
+        l.add_xpath('attributes', XPATH_ATTRIBUTES)
+        l.add_xpath('family', XPATH_FAMILY)
+        l.add_xpath('size', XPATH_SIZE)
+        l.add_xpath('debut', XPATH_DEBUT)
+        l.add_xpath('slide_forms', XPATH_SLIDE_FORMS)
+        l.add_xpath('prior_forms', XPATH_PRIOR_FORMS)
+        l.add_xpath('next_forms', XPATH_NEXT_FORMS)
+        l.add_xpath('partners', XPATH_PARTNERS)
+        l.add_xpath('voice_actors', XPATH_VOICE_ACTORS)
+        l.add_xpath('cards', XPATH_CARDS)
+        l.add_xpath('other_names', XPATH_OTHER_NAME)
+        l.add_xpath('variations', XPATH_VARIATIONS)
+        l.add_xpath('groups', XPATH_GROUPS)
 
-        data["name"] = response.xpath('//aside/h2/span[1]/text()').get()
-        data["original_name"] = response.xpath('//aside/h2//text()').getall()
-        data["image"] = response.xpath('//aside//figure/a/img/@src').get()
-        data["url"] = response.request.url
-
-        elements = response.xpath("//aside/div | //aside/section/table")
-        for el in elements:
-            key = el.xpath('./*[1]//text()').get()
-            value = el.xpath('./*[2]').get()
-
-            if key is not None:
-                data[key] = value
-
-        yield data
+        yield l.load_item()
 
     def handle_errors(self):
         print("CENAS--------------------------------------------------------------------")
