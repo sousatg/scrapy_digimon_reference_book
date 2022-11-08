@@ -1,12 +1,23 @@
-# Define here the models for your scraped items
-#
-# See documentation in:
-# https://docs.scrapy.org/en/latest/topics/items.html
-
-import scrapy
-
+from scrapy import Field
 
 class DigimonItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+    name = Field()
+    original_name = Field()
+    image = Field()
+    url = Field()
+    title = Field()
+    level = Field()
+    digi_types = Field()
+    attributes = Field()
+    family = Field()
+    size = Field()
+    debut = Field()
+    slide_forms = Field()
+    prior_forms = Field()
+    next_forms = Field()
+    partners = Field()
+    voice_actors = Field()
+    cards = Field()
+    other_names = Field()
+    variations = Field()
+    groups = Field()
