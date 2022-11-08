@@ -2,6 +2,7 @@ import scrapy
 import re
 from scrapy.loader import ItemLoader
 from digimon.items import DigimonItem
+from scrapy.loader.processors import TakeFirst
 
 
 XPATH_NAME = '//aside/h2/span[1]/text() | //aside/h2/text()[1]'
@@ -32,8 +33,13 @@ XPATH_TRAITS = '//div[h3/text() = "Trait(s):"]/div'
 XPATH_GENDER = '//div[h3/text() = "Gender:"]/div'
 XPATH_ALIASES = '//div[h3/text() = "Aliases:"]/div'
 
+
+
 class DigimonItemLoader(ItemLoader):
-    pass
+    name_out = TakeFirst()
+    image_out = TakeFirst()
+    url_out = TakeFirst()
+
 
 class DigimonSpider(scrapy.Spider):
     name = 'digimon'
